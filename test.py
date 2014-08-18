@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import time
+import requests
 
-def run(a = 1, b = 2):
-    time.sleep(10)
-    return a + b
+def run_website(method, url, **kwargs):
+    try:
+        result = requests.request(method, url, **kwargs)
+    except Exception as e:
+        result = str(e)
+    return "<%s> %s" %(url, result)
+
