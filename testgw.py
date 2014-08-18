@@ -1,30 +1,20 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from gevent import monkey;monkey.patch_all()
 import random
 import requests
 import time
+from gevent import queue
 
 from worker.job import Job
-from worker.tworker import ThreadWorker
-from Queue import Queue
+from worker.gworker import GeventWorker
 from test import run_website
 
 if __name__ == "__main__":
-    rq = Queue()
-    wq = Queue()
+    rq = queue.JoinableQueue()
+    wq = queue.JoinableQueue()
 
-#    for i in xrange(20):
-#        randomvar = random.random()
-#        j = Job.create(run, args=(randomvar,))
-#        wq.put_nowait(j)
-
-#    t = ThreadWorker.create(wq, rq)
-#    t.gogo()
-#
-#    while not t.rqueue.empty():
-#        item = t.rqueue.get_nowait()
-#        print item
     t1 = time.time()
 
     with open('top500websites.txt', 'r') as f:
@@ -35,12 +25,12 @@ if __name__ == "__main__":
                 kwargs = {'timeout':1})
         wq.put_nowait(j)
 
-    t = ThreadWorker.create(wq, rq)
+    t = GeventWorker.create(wq, rq)
     t.gogo()
 
     t2 = time.time()
     print("Time: %s" %(t2 - t1))
 
-    #while not t.rqueue.empty():
-    #    item = t.rqueue.get_nowait()
-    #    print item
+#    while not t.rqueue.empty():
+#        item = t.rqueue.get_nowait()
+#        print item
