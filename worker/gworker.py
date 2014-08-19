@@ -15,7 +15,7 @@ class GeventWorker():
 
         if not isinstance(wqueue, queue.JoinableQueue) or \
                 not isinstance(rqueue, queue.JoinableQueue):
-            raise TypeError('Expected two gevent.queue.Queue instance, but got %s and %s.'
+            raise TypeError('Expected two gevent.queue.JoinableQueue instance, but got %s and %s.'
                     %(type(wqueue), type(rqueue)))
 
         gw._wqueue_len = wqueue.qsize() if wqueue is not None else 0
@@ -26,7 +26,7 @@ class GeventWorker():
 
         gw.description = gw.get_description()
         gw.greenlets = [gevent.Greenlet(gw.__run)
-                for i in range(greenlet_num)]
+                for i in range(gw.wqueue_len)]
 
         return gw
 
@@ -54,8 +54,7 @@ class GeventWorker():
 
     def gogo(self):
         [t.start() for t in self.greenlets]
-        for t in self.greenlets:
-            t.join()
+        gevent.joinall(self.greenlets)
 
     @property
     def greenlet_num(self):

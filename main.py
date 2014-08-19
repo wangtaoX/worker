@@ -30,17 +30,17 @@ if __name__ == "__main__":
     with open('top500websites.txt', 'r') as f:
         websites = f.read().split('\n')
 
-    for web in websites[:100]:
+    for web in websites:
         j = Job.create(run_website, args=('GET', 'http://' + web,),
                 kwargs = {'timeout':1})
         wq.put_nowait(j)
 
-    t = ThreadWorker.create(wq, rq)
+    t = ThreadWorker.create(wq, rq, thread_num = 32)
     t.gogo()
 
     t2 = time.time()
     print("Time: %s" %(t2 - t1))
 
-    #while not t.rqueue.empty():
-    #    item = t.rqueue.get_nowait()
-    #    print item
+    while not t.rqueue.empty():
+        item = t.rqueue.get_nowait()
+        print item
